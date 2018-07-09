@@ -1,25 +1,31 @@
 import math
 import os
 import pprint
+import re
 
 DOCS = dict()
 WORD_DATA = dict()
 
 
-def read_documents():
-    directory_path = "data/Single/Source/DUC/"
-    directory = os.fsencode(directory_path)
+def read_document(doc_name):
+    file_path = "data/Single/Source/DUC/" + doc_name
 
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        with open(directory_path + filename) as fp:
-            doc = fp.readlines()
-            content = ""
-            for line in doc:
-                content += line
+    with open(file_path) as fp:
+        doc = fp.readlines()
+        content = ""
+        for line in doc:
+            content += line
 
-            fp.close()
-        DOCS[filename] = content
+        fp.close()
+    sentences = re.split("\.|\?|\!", content)
+    while sentences.__contains__(''):
+        sentences.remove('')
+
+    words = set(map(lambda x: x.strip(), content.replace("?", " ").replace("!", " ").replace(".", " ").
+                replace("؟", " ").replace("!", " ").replace("،", " ").split(" ")))
+    if words.__contains__(''):
+        words.remove('')
+    return sentences, words
 
 
 def tokenize():
@@ -84,5 +90,6 @@ def mutual_info():
         score[word] = s
 
 
-read_documents()
-tokenize()
+sentences, words = read_document('ALF.CU.13910117.019.txt')
+print(sentences, "\n", words)
+# tokenize()
