@@ -1,9 +1,11 @@
 import math
 import os
 import pprint
+import random
 import re
 import numpy as np
 from numpy import linalg as LA
+import copy
 import pandas as pd
 
 DOCS = dict()
@@ -43,14 +45,17 @@ def make_term_frequency(sentences, words):
 
 
 def sparse_coding(S, summary, lam):
-    n = S.shape[1]
-    k = summary.shape[1]
+    rotated_S = np.rot90(S)
+    rotated_summary = np.rot90(summary)
+    n = rotated_S.shape[1]
+    k = rotated_summary.shape[1]
     A_current = np.full((k, n), 1/k)
     lam1 = np.full((k, n), lam)
     t = 0
     while t < 100:
-        A_new = np.divide(np.multiply(A_current, np.matmul(summary.transpose(), S)),
-                          np.add(np.matmul(np.matmul(summary.transpose(), summary), A_current), lam1))
+        A_new = np.divide(np.multiply(A_current, np.matmul(rotated_summary.transpose(), rotated_S)),
+                          np.add(np.matmul(
+                              np.matmul(rotated_summary.transpose(), rotated_summary), A_current), lam1))
         if LA.norm(A_new - A_current) < 0.01:
             break
         t += 1
@@ -85,33 +90,45 @@ def update_T(step):
 
 
 def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
-    summary_current = pd.DataFrame()    # initialized randomly
-    T = 0
+    """
+    :param S:       This is candidate set. A n*d matrice
+    :param k:       The number of sentence in summary set(basis functions)
+    :param lam:     The lambda parameter
+    :param Tstop:   Stop temperature
+    :param MaxConseRej:
+    :return:        Index of sentences in candidate set that be included in summary set
+    """
+    n = S.shape[0]
+    summary_current = dict()    # initialized randomly matrice k*d
+    for index in random.sample(range(0, n), k):
+        summary_current[index] = S[index]
+    T = 1000    # arbitrary
     rej = 0
-    Jopti = 9999999 #max
-    summary_opti = pd.DataFrame()
+    Jopti = 9999999     # max
+    summary_opti = copy.deepcopy(summary_current)
     step = 0
     while T > Tstop:
-        A = sparse_coding(S, summary_current, lam)
-        current_J = J(S, A, T, lam)
+        A = sparse_coding(S, summary_current, lam)  # k*n matrice
+        current_J = J(S, A, summary_current, lam)
         if current_J < Jopti:
             Jopti = current_J
-            summary_opti = summary_current
+            summary_opti = copy.deepcopy(summary_current)
         else:
             rej += 1
             if rej >= MaxConseRej:
-                return summary_opti
-        summary_new = pd.DataFrame()
-        for s in summary_current:
-            tmp = update_summary(s, T)
+                return summary_opti.keys()
+        summary_new = dict()
+        for index in summary_current.keys():
+            s = summary_current[index]
+            tmp, tmp_index = update_summary(s, T)
             if Accept(s, tmp, summary_current, T):
-                summary_new.add(tmp)
+                summary_new[tmp_index] = tmp
             else:
-                summary_new.add(s)
-        summary_current = summary_new
+                summary_new[index] = s
+        summary_current = copy.deepcopy(summary_new)
         T = update_T(step)
         step += 1
-    return summary_opti
+    return summary_opti.keys()
 
 
 sentences, words = read_document('ALF.CU.13910117.019.txt')
