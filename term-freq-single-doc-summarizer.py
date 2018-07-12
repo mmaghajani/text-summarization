@@ -3,10 +3,13 @@ import os
 import pprint
 import random
 import re
+import scipy
+
 import numpy as np
 from numpy import linalg as LA
 import copy
 import pandas as pd
+from scipy.spatial import distance
 
 DOCS = dict()
 WORD_DATA = dict()
@@ -77,8 +80,16 @@ def J(S, A, summary_current, lam):
     return loss1+(lam*loss2)
 
 
-def update_summary(s, T):
-    return ''
+def update_summary(s, T, summary_new, S):
+    # TODO : T coming in play!
+    min_dist = 9999999  # max
+    min_index = 0
+    for index in range(len(S)):
+        temp_dist = scipy.spatial.distance.euclidean(s,S[index])
+        if temp_dist < min_dist and index not in summary_new.keys():
+            min_dist = temp_dist
+            min_index = index
+    return S[min_index], min_index
 
 
 def Accept(s, tmp, summary_current, T):
@@ -120,7 +131,7 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
         summary_new = dict()
         for index in summary_current.keys():
             s = summary_current[index]
-            tmp, tmp_index = update_summary(s, T)
+            tmp, tmp_index = update_summary(s, T, summary_new, S)
             if Accept(s, tmp, summary_current, T):
                 summary_new[tmp_index] = tmp
             else:
