@@ -104,7 +104,7 @@ def Accept(s_index, tmp_index, summary_current, T, S, A, lam):
         deltaE = current_J - next_J
         if T is 0:
             return False
-        p = math.pi**(deltaE/T)
+        p = math.e**(deltaE/T)
         if random.random() < p:
             return True
         else:
@@ -112,7 +112,7 @@ def Accept(s_index, tmp_index, summary_current, T, S, A, lam):
 
 
 def update_T(step):
-    return ''
+    return math.e**(-1*(step/5-5))
 
 
 def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
@@ -128,11 +128,11 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
     summary_current = dict()    # initialized randomly matrice k*d
     for index in random.sample(range(0, n), k):
         summary_current[index] = S[index]
-    T = 1000    # arbitrary
     rej = 0
     Jopti = 9999999     # max
     summary_opti = copy.deepcopy(summary_current)
     step = 0
+    T = update_T(step)    # arbitrary
     while T > Tstop:
         A = sparse_coding(S, summary_current, lam)  # k*n matrice
         current_J = J(S, A, summary_current, lam)
@@ -152,8 +152,8 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
             else:
                 summary_new[index] = s
         summary_current = copy.deepcopy(summary_new)
-        T = update_T(step)
         step += 1
+        T = update_T(step)
     return summary_opti.keys()
 
 
