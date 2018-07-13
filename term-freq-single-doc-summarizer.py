@@ -82,7 +82,7 @@ for file in os.listdir(directory):
     candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
     summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
     summary_text = make_summary_as_text(summary_set, term_frequency)
-
+    print(len(summary_text))
     rouge_1_fscores = 0
     rouge_2_fscores = 0
     for summary_ref in reference_summaries:

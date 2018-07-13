@@ -40,13 +40,20 @@ def J(S, A, summary_current, lam):
     return loss1+(lam*loss2)
 
 
+def is_in_numpy(sentence, matrice):
+    for s in matrice:
+        if (sentence==s).all():
+            return True
+    return False
+
+
 def update_summary(s, T, summary_new, S):
     # TODO : T coming in play!
     min_dist = 9999999  # max
     min_sentence = 0
     for sentence in S:
         temp_dist = scipy.spatial.distance.euclidean(s, sentence)
-        if temp_dist < min_dist and sentence not in summary_new:
+        if temp_dist < min_dist and not is_in_numpy(sentence, summary_new):
             min_dist = temp_dist
             min_sentence = sentence
     return min_sentence
@@ -55,9 +62,10 @@ def update_summary(s, T, summary_new, S):
 def Accept(s, tmp, summary_current, T, S, A, lam):
     summary_temp = list()
     for sentence in summary_current:
-        summary_temp.append(sentence)
-    summary_temp.remove(s)
-    summary_temp.append(tmp)
+        if (s == sentence).all():
+            summary_temp.append(tmp)
+        else:
+            summary_temp.append(sentence)
     summary_temp = np.array(summary_temp)
     current_J = J(S, A, summary_current, lam)
     next_J = J(S, A, summary_temp, lam)
