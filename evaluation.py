@@ -1,5 +1,3 @@
-
-
 def collect_pairs(lines):
     token = []
     for line in lines:
@@ -46,6 +44,6 @@ def RougeFScore(candidate_summary, reference_summary, n):
     return 2 * (Precision * Recall) / (Precision + Recall)
 
 
-candidate_summary = ['او نیامده خواهد آمد', 'من به زودی میروم']
-reference_summary = ['او نیامده', 'او زودی نیامده']
-print(RougeFScore(candidate_summary, reference_summary, 2))
+# candidate_summary = ['او نیامده خواهد آمد', 'من به زودی میروم']
+# reference_summary = ['او نیامده', 'او زودی نیامده']
+# print(RougeFScore(candidate_summary, reference_summary, 2))
