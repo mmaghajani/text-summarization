@@ -22,7 +22,7 @@ def sparse_coding(S, summary, lam):
         if LA.norm(A_new - A_current) < 0.01:
             break
         t += 1
-        A_current = A_new
+        A_current = copy.deepcopy(A_new)
     return A_current
 
 
@@ -43,19 +43,22 @@ def J(S, A, summary_current, lam):
 def update_summary(s, T, summary_new, S):
     # TODO : T coming in play!
     min_dist = 9999999  # max
-    min_index = 0
-    for index in range(len(S)):
-        temp_dist = scipy.spatial.distance.euclidean(s, S[index])
-        if temp_dist < min_dist and index not in summary_new.keys():
+    min_sentence = 0
+    for sentence in S:
+        temp_dist = scipy.spatial.distance.euclidean(s, sentence)
+        if temp_dist < min_dist and sentence not in summary_new:
             min_dist = temp_dist
-            min_index = index
-    return S[min_index], min_index
+            min_sentence = sentence
+    return min_sentence
 
 
-def Accept(s_index, tmp_index, summary_current, T, S, A, lam):
-    summary_temp = copy.deepcopy(summary_current)
-    summary_temp.pop(s_index)   # remove a sentence
-    summary_temp[tmp_index] = S[tmp_index]  # replace a new sentence
+def Accept(s, tmp, summary_current, T, S, A, lam):
+    summary_temp = list()
+    for sentence in summary_current:
+        summary_temp.append(sentence)
+    summary_temp.remove(s)
+    summary_temp.append(tmp)
+    summary_temp = np.array(summary_temp)
     current_J = J(S, A, summary_current, lam)
     next_J = J(S, A, summary_temp, lam)
     if next_J < current_J:
@@ -85,9 +88,10 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
     :return:        Index of sentences in candidate set that be included in summary set
     """
     n = S.shape[0]
-    summary_current = dict()    # initialized randomly matrice k*d
+    summary_current = list()    # initialized randomly matrice k*d
     for index in random.sample(range(0, n), k):
-        summary_current[index] = S[index]
+        summary_current.append(S[index])
+    summary_current = np.array(summary_current)
     rej = 0
     Jopti = 9999999     # max
     summary_opti = copy.deepcopy(summary_current)
@@ -103,15 +107,14 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
             rej += 1
             if rej >= MaxConseRej:
                 return summary_opti
-        summary_new = dict()
-        for index in summary_current.keys():
-            s = summary_current[index]
-            tmp, tmp_index = update_summary(s, T, summary_new, S)
-            if Accept(index, tmp_index, summary_current, T, S, A, lam):
-                summary_new[tmp_index] = tmp
+        summary_new = list()
+        for s in summary_current:
+            tmp = update_summary(s, T, summary_new, S)
+            if Accept(s, tmp, summary_current, T, S, A, lam):
+                summary_new.append(tmp)
             else:
-                summary_new[index] = s
-        summary_current = copy.deepcopy(summary_new)
+                summary_new.append(s)
+        summary_current = copy.deepcopy(np.array(summary_new))
         step += 1
         T = update_T(step)
     return summary_opti

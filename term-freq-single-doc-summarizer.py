@@ -2,7 +2,7 @@ import os
 import re
 import sparse_coding as sc
 import evaluation as eval
-import pandas as pd
+import numpy as np
 from evaluation import Level
 import fnmatch
 
@@ -33,8 +33,8 @@ def read_document(doc_name):
     while sentences.__contains__(''):
         sentences.remove('')
 
-    words = set(map(lambda x: x.strip(), content.replace("?", " ").replace("!", " ").replace(".", " ").
-                replace("؟", " ").replace("!", " ").replace("،", " ").split(" ")))
+    words = list(set(map(lambda x: x.strip(), content.replace("?", " ").replace("!", " ").replace(".", " ").
+                replace("؟", " ").replace("!", " ").replace("،", " ").split(" "))))
     if words.__contains__(''):
         words.remove('')
     return sentences, words
@@ -51,10 +51,10 @@ def make_term_frequency(sentences, words):
     return term_frequency
 
 
-def make_summary_text(summary_set, term_frequency):
+def make_summary_as_text(summary_set, term_frequency):
     summary_text = ''
     for sentence in term_frequency.keys():
-        if term_frequency[sentence] in summary_set.values():
+        if term_frequency[sentence] in summary_set:
             summary_text += sentence
     return summary_text
 
@@ -78,11 +78,10 @@ for file in os.listdir(directory):
     sentences, words = read_document(filename)
     reference_summaries = read_ref_summaries(filename[:-4])
 
-    listed_word = list(words)
-    term_frequency = make_term_frequency(sentences, listed_word)
-    candidate_set = pd.DataFrame([*v] for k, v in term_frequency.items())
+    term_frequency = make_term_frequency(sentences, words)
+    candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
     summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
-    summary_text = make_summary_text(summary_set, term_frequency)
+    summary_text = make_summary_as_text(summary_set, term_frequency)
 
     rouge_1_fscores = 0
     rouge_2_fscores = 0
