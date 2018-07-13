@@ -1,10 +1,15 @@
 import re
 import sparse_coding as sc
 import evaluation as eval
-
+import pandas as pd
 
 DOCS = dict()
 WORD_DATA = dict()
+
+NUMBER_SUMMARY_SET_ELEMENT = 10
+LAMBDA = 3
+TSTOP = 0.0001
+MAX_CONSE_REJ = 100
 
 
 def read_document(doc_name):
@@ -39,9 +44,20 @@ def make_term_frequency(sentences, words):
     return term_frequency
 
 
+def make_summary_text(summary_set, term_frequency):
+    summary_text = ''
+    for sentence in term_frequency.keys():
+        if term_frequency[sentence] in summary_set.values():
+            summary_text += sentence
+    return summary_text
+
+
 sentences, words = read_document('ALF.CU.13910117.019.txt')
 reference_summary = read_document('path to ref summary')
 listed_word = list(words)
 term_frequency = make_term_frequency(sentences, listed_word)
-summary_set = sc.MDS_sparse(term_frequency, 10, 3, 0.0001, 100)
-eval.RougeFScore(summary_set,  reference_summary, 10)
+candidate_set = pd.DataFrame([*v] for k, v in term_frequency.items())
+summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
+summary_text = make_summary_text(summary_set, term_frequency)
+rouge_fscore = eval.RougeFScore(summary_text,  reference_summary, NUMBER_SUMMARY_SET_ELEMENT)
+print("Rouge FSCORE : ", rouge_fscore)
