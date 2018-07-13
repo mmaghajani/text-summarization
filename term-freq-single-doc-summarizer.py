@@ -1,8 +1,10 @@
+import os
 import re
 import sparse_coding as sc
 import evaluation as eval
 import pandas as pd
 from evaluation import Level
+import fnmatch
 
 
 DOCS = dict()
@@ -13,9 +15,12 @@ LAMBDA = 3
 TSTOP = 0.0001
 MAX_CONSE_REJ = 100
 
+DATA_PATH = "data/Single/Source/DUC/"
+SUMMARY_PATH = "data/Single/Summ/Extractive/"
+
 
 def read_document(doc_name):
-    file_path = "data/Single/Source/DUC/" + doc_name
+    file_path = DATA_PATH + doc_name
 
     with open(file_path) as fp:
         doc = fp.readlines()
@@ -54,16 +59,39 @@ def make_summary_text(summary_set, term_frequency):
     return summary_text
 
 
-sentences, words = read_document('ALF.CU.13910117.019.txt')
-reference_summary = read_document('path to ref summary')
-listed_word = list(words)
-term_frequency = make_term_frequency(sentences, listed_word)
-candidate_set = pd.DataFrame([*v] for k, v in term_frequency.items())
-summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
-summary_text = make_summary_text(summary_set, term_frequency)
+def read_ref_summaries(filename):
+    directory = os.fsencode(SUMMARY_PATH)
+    summaries = list()
+    for file in os.listdir(directory):
+        name = os.fsdecode(file)
+        if fnmatch.fnmatch(name, filename + '*'):
+            with open(SUMMARY_PATH + name) as summ_file:
+                content = summ_file.readlines()
+                summaries.append(content)
+                summ_file.close()
+    return summaries
 
-rouge_1_fscore = eval.RougeFScore(summary_text,  reference_summary, Level.Rouge_1)
-print("Rouge-1 FSCORE : ", rouge_1_fscore)
 
-rouge_2_fscore = eval.RougeFScore(summary_text,  reference_summary, Level.Rouge_2)
-print("Rouge-2 FSCORE : ", rouge_2_fscore)
+directory = os.fsencode(DATA_PATH)
+for file in os.listdir(directory):
+    filename = os.fsdecode(file)
+    sentences, words = read_document(filename)
+    reference_summaries = read_ref_summaries(filename[:-4])
+
+    listed_word = list(words)
+    term_frequency = make_term_frequency(sentences, listed_word)
+    candidate_set = pd.DataFrame([*v] for k, v in term_frequency.items())
+    summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
+    summary_text = make_summary_text(summary_set, term_frequency)
+
+    rouge_1_fscores = 0
+    rouge_2_fscores = 0
+    for summary_ref in reference_summaries:
+        rouge_1_fscore = eval.RougeFScore(summary_text,  summary_ref, Level.Rouge_1)
+        rouge_1_fscores += rouge_1_fscore
+
+        rouge_2_fscore = eval.RougeFScore(summary_text,  summary_ref, Level.Rouge_2)
+        rouge_2_fscores += rouge_2_fscore
+
+    print("Rouge-1 Fscore : ", rouge_1_fscores/5)
+    print("Rouge-2 Fscore : ", rouge_2_fscores/5)
