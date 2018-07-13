@@ -10,7 +10,7 @@ import fnmatch
 DOCS = dict()
 WORD_DATA = dict()
 
-NUMBER_SUMMARY_SET_ELEMENT = 10
+NUMBER_SUMMARY_SET_ELEMENT = 5
 LAMBDA = 3
 TSTOP = 0.0001
 MAX_CONSE_REJ = 100
@@ -52,10 +52,10 @@ def make_term_frequency(sentences, words):
 
 
 def make_summary_as_text(summary_set, term_frequency):
-    summary_text = ''
+    summary_text = list()
     for sentence in term_frequency.keys():
         if term_frequency[sentence] in summary_set:
-            summary_text += sentence
+            summary_text.append(sentence)
     return summary_text
 
 
@@ -66,8 +66,12 @@ def read_ref_summaries(filename):
         name = os.fsdecode(file)
         if fnmatch.fnmatch(name, filename + '*'):
             with open(SUMMARY_PATH + name) as summ_file:
-                content = summ_file.readlines()
-                summaries.append(content)
+                lines = summ_file.readlines()
+                content = ''
+                for line in lines:
+                    content += line
+                sentences = re.split("\.|\?|\!", content)
+                summaries.append(sentences)
                 summ_file.close()
     return summaries
 
@@ -82,7 +86,6 @@ for file in os.listdir(directory):
     candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
     summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
     summary_text = make_summary_as_text(summary_set, term_frequency)
-    print(len(summary_text))
     rouge_1_fscores = 0
     rouge_2_fscores = 0
     for summary_ref in reference_summaries:
