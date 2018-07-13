@@ -92,8 +92,23 @@ def update_summary(s, T, summary_new, S):
     return S[min_index], min_index
 
 
-def Accept(s, tmp, summary_current, T):
-    return False
+def Accept(s_index, tmp_index, summary_current, T, S, A, lam):
+    summary_temp = copy.deepcopy(summary_current)
+    summary_temp.pop(s_index)   # remove a sentence
+    summary_temp[tmp_index] = S[tmp_index]  # replace a new sentence
+    current_J = J(S, A, summary_current, lam)
+    next_J = J(S, A, summary_temp, lam)
+    if next_J < current_J:
+        return True
+    else:
+        deltaE = current_J - next_J
+        if T is 0:
+            return False
+        p = math.pi**(deltaE/T)
+        if random.random() < p:
+            return True
+        else:
+            return False
 
 
 def update_T(step):
@@ -132,7 +147,7 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
         for index in summary_current.keys():
             s = summary_current[index]
             tmp, tmp_index = update_summary(s, T, summary_new, S)
-            if Accept(s, tmp, summary_current, T):
+            if Accept(index, tmp_index, summary_current, T, S, A, lam):
                 summary_new[tmp_index] = tmp
             else:
                 summary_new[index] = s
