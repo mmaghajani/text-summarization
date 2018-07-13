@@ -1,3 +1,11 @@
+from enum import Enum
+
+
+class Level(Enum):
+    Rouge_1 = 1
+    Rouge_2 = 2
+
+
 def collect_pairs(lines):
     token = []
     for line in lines:
@@ -8,9 +16,9 @@ def collect_pairs(lines):
     return set(token)
 
 
-def Rouge(candidate_summary, reference_summary, n, mode):  # mode = precision or recall
+def Rouge(candidate_summary, reference_summary, level, mode):  # mode = precision or recall
     coOccurrings = 0
-    if n == 2:
+    if level == Level.Rouge_2:
         bigrams = collect_pairs(reference_summary)
         for summary in candidate_summary:
             for bigram in bigrams:
@@ -20,7 +28,7 @@ def Rouge(candidate_summary, reference_summary, n, mode):  # mode = precision or
         elif mode == "recall":
             return coOccurrings / len(bigrams)
 
-    elif n == 1:
+    elif level == Level.Rouge_1:
         splited = []
         for summary in reference_summary:
             splited += summary.split()

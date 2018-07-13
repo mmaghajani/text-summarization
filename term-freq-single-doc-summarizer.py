@@ -2,6 +2,8 @@ import re
 import sparse_coding as sc
 import evaluation as eval
 import pandas as pd
+from evaluation import Level
+
 
 DOCS = dict()
 WORD_DATA = dict()
@@ -59,5 +61,9 @@ term_frequency = make_term_frequency(sentences, listed_word)
 candidate_set = pd.DataFrame([*v] for k, v in term_frequency.items())
 summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
 summary_text = make_summary_text(summary_set, term_frequency)
-rouge_fscore = eval.RougeFScore(summary_text,  reference_summary, NUMBER_SUMMARY_SET_ELEMENT)
-print("Rouge FSCORE : ", rouge_fscore)
+
+rouge_1_fscore = eval.RougeFScore(summary_text,  reference_summary, Level.Rouge_1)
+print("Rouge-1 FSCORE : ", rouge_1_fscore)
+
+rouge_2_fscore = eval.RougeFScore(summary_text,  reference_summary, Level.Rouge_2)
+print("Rouge-2 FSCORE : ", rouge_2_fscore)
