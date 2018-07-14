@@ -17,16 +17,18 @@ def collect_pairs(lines):
 
 
 def Rouge(candidate_summary, reference_summary, level, mode):  # mode = precision or recall
-    coOccurrings = 0
+    coOccurrings = []
     if level == Level.Rouge_2:
         bigrams = collect_pairs(reference_summary)
         for summary in candidate_summary:
             for bigram in bigrams:
-                coOccurrings += int(summary.count(bigram))
+                if bigram in summary:
+                    coOccurrings.append(bigram)
+
         if mode == "precision":
-            return coOccurrings / len(collect_pairs(candidate_summary))
+            return len(set(coOccurrings)) / len(collect_pairs(candidate_summary))
         elif mode == "recall":
-            return coOccurrings / len(bigrams)
+            return len(set(coOccurrings)) / len(bigrams)
 
     elif level == Level.Rouge_1:
         splited = []
@@ -35,14 +37,16 @@ def Rouge(candidate_summary, reference_summary, level, mode):  # mode = precisio
         unigrams = set(splited)
         for summary in candidate_summary:
             for unigram in unigrams:
-                coOccurrings += int(summary.count(unigram))
+                if unigram in summary:
+                    coOccurrings.append(unigram)
+
         if mode == "precision":
             tmp = []
             for summary in candidate_summary:
                 tmp += summary.split()
-            return coOccurrings / len(set(tmp))
+            return len(set(coOccurrings)) / len(set(tmp))
         elif mode == "recall":
-            return coOccurrings / len(unigrams)
+            return len(set(coOccurrings)) / len(unigrams)
 
 
 def RougeFScore(candidate_summary, reference_summary, n):
