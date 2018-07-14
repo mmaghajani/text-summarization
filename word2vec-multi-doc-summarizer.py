@@ -8,8 +8,8 @@ import tqdm
 DOCS = dict()
 
 
-def read_documents():
-    directory_path = "data/Multi/Track1/Source/D91A01/"
+def read_documents(directory_path):
+    # directory_path = "data/Multi/Track1/Source/D91A01/"
     directory = os.fsencode(directory_path)
     contents = ""
     for file in os.listdir(directory):
@@ -72,6 +72,13 @@ def represent(data, model):
     return train_df
 
 
-result = represent(read_documents(), w2v)
-print(result)
-print(result.shape)
+rootdir = "data/Multi"
+for i in range(1,9):
+    subDir = os.path.join(rootdir, "Track"+str(i)+"/Source/")
+    for root, dirs, files in os.walk(subDir):
+        if dirs:
+            for dir in dirs:
+                print(subDir+dir+"/")
+                result = represent(read_documents(subDir+dir+"/"), w2v)
+                # print(result)
+                print(result.shape)
