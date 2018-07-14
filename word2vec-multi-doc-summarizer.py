@@ -53,6 +53,7 @@ def AvgSent2vec(words, model):
 
 
 def represent(data, model):
+    word2vec = dict()  # final dictionary containing sentence as the key and its representation as value
     DocMatix = np.zeros((len(data), 100))
 
     for i in range(len(data)):
@@ -62,6 +63,7 @@ def represent(data, model):
         if words.__contains__(''):
             words.remove('')
         DocMatix[i] = AvgSent2vec(words, model)
+        word2vec[data[i]] = DocMatix[i]
     print("features calculated")
     train_df = pd.DataFrame(DocMatix)
 
