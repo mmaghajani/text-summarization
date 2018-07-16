@@ -5,7 +5,6 @@ import sparse_coding as sc
 import evaluation as eval
 import numpy as np
 from evaluation import Level
-import fnmatch
 
 DOCS = dict()
 WORD_DATA = dict()
@@ -82,8 +81,8 @@ def readSummaries(dir):
                         for line in doc:
                             content += line
                         fp.close()
-                    summaries.append(content)
-
+                    sentences = re.split("\.|\?|\!", content)
+                    summaries.append(sentences)
     return summaries
 
 
@@ -93,10 +92,7 @@ for i in range(1,9):
     for root, dirs, files in os.walk(subDir):
         if dirs:
             for dir in dirs:
-                print(dir)
-                print(subDir+dir+"/")
                 sentences, words = read_documents(subDir+dir+"/")
-                print(sentences)
                 reference_summaries = readSummaries(dir)
                 term_frequency = make_term_frequency(sentences, words)
                 candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
@@ -113,4 +109,3 @@ for i in range(1,9):
 
                 print("Rouge-1 Fscore : ", rouge_1_fscores / 5)
                 print("Rouge-2 Fscore : ", rouge_2_fscores / 5)
-                # print(result)

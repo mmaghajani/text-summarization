@@ -86,8 +86,8 @@ def readSummaries(dir):
                         for line in doc:
                             content += line
                         fp.close()
-                    summaries.append(content)
-
+                    sentences = re.split("\.|\?|\!", content)
+                    summaries.append(sentences)
     return summaries
 
 
