@@ -53,9 +53,11 @@ def make_term_frequency(sentences, words):
 
 def summary_vector_to_text_as_list(summary_set, term_frequency):
     summary_text = list()
-    for sentence in term_frequency.keys():
-        if term_frequency[sentence] in summary_set:
-            summary_text.append(sentence)
+    for sen_vec in summary_set:
+        for sentence in term_frequency.keys():
+            if (term_frequency[sentence] == sen_vec).all():
+                summary_text.append(sentence)
+                break
     return summary_text
 
 
