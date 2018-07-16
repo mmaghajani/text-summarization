@@ -48,7 +48,7 @@ def make_term_frequency(sentences, words):
     return term_frequency
 
 
-def make_summary_as_text(summary_set, term_frequency):
+def summary_vector_to_text_as_list(summary_set, term_frequency):
     summary_text = list()
     for sentence in term_frequency.keys():
         if term_frequency[sentence] in summary_set:
@@ -97,7 +97,7 @@ for i in range(1,9):
                 term_frequency = make_term_frequency(sentences, words)
                 candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
                 summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
-                summary_text = make_summary_as_text(summary_set, term_frequency)
+                summary_text = summary_vector_to_text_as_list(summary_set, term_frequency)
                 rouge_1_fscores = 0
                 rouge_2_fscores = 0
                 for summary_ref in reference_summaries:
