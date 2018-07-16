@@ -72,13 +72,47 @@ def represent(data, model):
     return train_df
 
 
+def readSummaries(dir):
+    summaries = []
+    rootdir1 = "data/Multi"
+    for i in range(1, 9):
+        subDir = os.path.join(rootdir1, "Track" + str(i) + "/Summ/")
+        for root, dirs, files in os.walk(subDir):
+            for file in files:
+                if dir+'.E' in file:
+                    with open(findInSubdirectory(file)) as fp:
+                        doc = fp.readlines()
+                        content = ""
+                        for line in doc:
+                            content += line
+                        fp.close()
+                    summaries.append(content)
+
+    return summaries
+
+
+def findInSubdirectory(filename, subdirectory="data/Multi"):
+    if subdirectory:
+        path = subdirectory
+    else:
+        path = os.getcwd()
+    for root, dirs, names in os.walk(path):
+        if filename in names:
+            return os.path.join(root, filename)
+    return 'File not found'
+
+
 rootdir = "data/Multi"
 for i in range(1,9):
     subDir = os.path.join(rootdir, "Track"+str(i)+"/Source/")
     for root, dirs, files in os.walk(subDir):
         if dirs:
             for dir in dirs:
+                print(dir)
                 print(subDir+dir+"/")
                 result = represent(read_documents(subDir+dir+"/"), w2v)
+                summaries = readSummaries(dir)
                 # print(result)
                 print(result.shape)
+
+# a = readSummaries('D91A50')
