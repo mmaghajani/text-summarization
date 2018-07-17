@@ -6,6 +6,9 @@ import evaluation as eval
 import numpy as np
 from evaluation import Level
 import pprint
+from scipy.spatial import distance
+import scipy
+import copy
 
 
 DOCS = dict()
@@ -13,7 +16,7 @@ WORD_DATA = dict()
 
 NUMBER_SUMMARY_SET_ELEMENT = 10
 LAMBDA = 3
-TSTOP = 0.0001
+TSTOP = 0.001
 MAX_CONSE_REJ = 100
 
 
@@ -53,10 +56,14 @@ def make_term_frequency(sentences, words):
 def summary_vector_to_text_as_list(summary_set, term_frequency):
     summary_text = list()
     for sen_vec in summary_set:
+        min_dist = 9999999   # max
+        min_sentence = ''
         for sentence in term_frequency.keys():
-            if (term_frequency[sentence] == sen_vec).all():
-                summary_text.append(sentence)
-                break
+            temp_dist = scipy.spatial.distance.euclidean(sen_vec, term_frequency[sentence])
+            if temp_dist < min_dist:
+                min_dist = temp_dist
+                min_sentence = sentence
+        summary_text.append(min_sentence)
     return summary_text
 
 
@@ -100,7 +107,6 @@ for i in range(1,9):
                 reference_summaries = readSummaries(dir)
                 term_frequency = make_term_frequency(sentences, words)
                 candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
-
                 summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
                 summary_text = summary_vector_to_text_as_list(summary_set, term_frequency)
                 rouge_1_fscores = 0

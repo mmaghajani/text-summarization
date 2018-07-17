@@ -1,7 +1,5 @@
 import numpy as np
 from numpy import linalg as LA
-from scipy.spatial import distance
-import scipy
 import copy
 import math
 import random
@@ -47,11 +45,11 @@ def is_in_numpy(sentence, matrice):
     return False
 
 
-def update_summary(s, T, summary_new, S):
+def update_summary(s, T, summary_new, d):
     # TODO : T coming in play!
     while True:
         temp = copy.deepcopy(s)
-        for i in random.sample(range(len(s)), 100):
+        for i in random.sample(range(len(s)), int(d/3)):
             temp[i] += 1
         if not is_in_numpy(temp, summary_new):
             return temp
@@ -73,11 +71,9 @@ def Accept(s, tmp, summary_current, T, S, lam):
         return True
     else:
         deltaE = current_J - next_J
-        # print(deltaE)
         if T == 0:
             return False
         p = math.e**(deltaE/T)
-        # print(p)
         if random.random() < p:
             return True
         else:
@@ -110,7 +106,6 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
     while T > Tstop:
         A = sparse_coding(S, summary_current, lam)  # k*n matrice
         current_J = J(S, A, summary_current, lam)
-        print(current_J)
         if current_J < Jopti:
             Jopti = current_J
             summary_opti = copy.deepcopy(summary_current)
@@ -120,7 +115,7 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
                 return summary_opti
         summary_new = list()
         for s in summary_current:
-            tmp = update_summary(s, T, summary_new, S)
+            tmp = update_summary(s, T, summary_new, S.shape[1])
             if Accept(s, tmp, summary_current, T, S, lam):
                 summary_new.append(tmp)
             else:
@@ -129,5 +124,4 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
         summary_current = copy.deepcopy(temp)
         step += 1
         T = update_T(step)
-        print(T)
     return summary_opti
