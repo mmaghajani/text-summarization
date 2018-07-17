@@ -7,7 +7,7 @@ import utils as util
 
 
 NUMBER_SUMMARY_SET_ELEMENT = 10
-LAMBDA = 3
+LAMBDA = 0.5
 TSTOP = 0.001
 MAX_CONSE_REJ = 100
 

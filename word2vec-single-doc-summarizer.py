@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import os
 import sparse_coding as sc
 from evaluation import Level
@@ -13,64 +12,13 @@ TSTOP = 0.0001
 MAX_CONSE_REJ = 100
 
 
-w2v = dict()
-print("waiting to load word2vec model...")
-with open('twitt_wiki_ham_blog.fa.text.100.vec', 'r', encoding='utf-8') as infile:
-    first_line = True
-    for line in infile:
-        if first_line:
-            first_line = False
-            continue
-        tokens = line.split()
-        w2v[tokens[0]] = [float(el) for el in tokens[1:]]
-        if len(w2v[tokens[0]]) != 100:
-            print('Bad line!')
-print("model loaded")
-
-
-def AvgSent2vec(words, model):
-    M = []
-    for w in words:
-        try:
-            M.append(model[w])
-        except:
-            continue
-    M = np.array(M)
-    v = M.mean(axis=0)
-    return v / np.sqrt((v ** 2).sum())
-
-
-def represent(data, model):
-    word2vec = dict()  # final dictionary containing sentence as the key and its representation as value
-    DocMatix = np.zeros((len(data), 100))
-
-    for i in range(len(data)):
-
-        words = list(map(lambda x: x.strip(), data[i].replace("?", " ").replace("!", " ").replace(".", " ").
-                    replace("؟", " ").replace("!", " ").replace("،", " ").split(" ")))
-        if words.__contains__(''):
-            words.remove('')
-
-        result = AvgSent2vec(words, model)
-        if not( np.isnan(result).any()):
-            DocMatix[i] = result
-            word2vec[data[i]] = DocMatix[i]
-    print("features calculated")
-    # print(word2vec)
-    train_df = pd.DataFrame(DocMatix)
-
-    train_df.to_csv('AvgSent2vec.csv', index=False)
-
-    return word2vec
-
-
 directory = os.fsencode(util.DATA_PATH)
 for file in os.listdir(directory):
     filename = os.fsdecode(file)
     # sentences = read_document(filename)
     reference_summaries = util.read_single_ref_summaries(filename[:-4])
     sentence, _ = util.read_document(filename)
-    word2vec = represent(sentence, w2v)
+    word2vec = util.make_word_2_vec(sentence, util.read_word2vec_model())
 
     candidate_set = np.array(list([*v] for k, v in word2vec.items()))
     try:

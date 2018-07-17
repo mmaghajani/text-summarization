@@ -1,10 +1,11 @@
 from lxml import etree
 from scipy.spatial import distance
 import scipy
-import os
 import re
 import fnmatch
-
+import numpy as np
+import pandas as pd
+import os
 
 DOCS = dict()
 
@@ -64,6 +65,59 @@ def make_term_frequency(sentences, words):
             vector.append(sentence.count(word))
         term_frequency[sentence] = vector
     return term_frequency
+
+
+def __avg_sent_2_vec(words, model):
+    M = []
+    for w in words:
+        try:
+            M.append(model[w])
+        except:
+            continue
+    M = np.array(M)
+    v = M.mean(axis=0)
+    return v / np.sqrt((v ** 2).sum())
+
+
+def read_word2vec_model():
+    w2v = dict()
+    print("waiting to load word2vec model...")
+    with open('twitt_wiki_ham_blog.fa.text.100.vec', 'r', encoding='utf-8') as infile:
+        first_line = True
+        for line in infile:
+            if first_line:
+                first_line = False
+                continue
+            tokens = line.split()
+            w2v[tokens[0]] = [float(el) for el in tokens[1:]]
+            if len(w2v[tokens[0]]) != 100:
+                print('Bad line!')
+    print("model loaded")
+    return w2v
+
+
+def make_word_2_vec(data, model):
+    word2vec = dict()  # final dictionary containing sentence as the key and its representation as value
+    DocMatix = np.zeros((len(data), 100))
+
+    for i in range(len(data)):
+
+        words = list(map(lambda x: x.strip(), data[i].replace("?", " ").replace("!", " ").replace(".", " ").
+                    replace("؟", " ").replace("!", " ").replace("،", " ").split(" ")))
+        if words.__contains__(''):
+            words.remove('')
+
+        result = __avg_sent_2_vec(words, model)
+        if not( np.isnan(result).any()):
+            DocMatix[i] = result
+            word2vec[data[i]] = DocMatix[i]
+    print("features calculated")
+    # print(word2vec)
+    train_df = pd.DataFrame(DocMatix)
+
+    train_df.to_csv('AvgSent2vec.csv', index=False)
+
+    return word2vec
 
 
 def summary_vector_to_text_as_list(summary_set, term_frequency):
