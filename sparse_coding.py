@@ -49,14 +49,12 @@ def is_in_numpy(sentence, matrice):
 
 def update_summary(s, T, summary_new, S):
     # TODO : T coming in play!
-    min_dist = 9999999  # max
-    min_sentence = 0
-    for sentence in S:
-        temp_dist = scipy.spatial.distance.euclidean(s, sentence)
-        if temp_dist < min_dist and not is_in_numpy(sentence, summary_new) and temp_dist != 0:
-            min_dist = temp_dist
-            min_sentence = sentence
-    return min_sentence
+    while True:
+        temp = copy.deepcopy(s)
+        for i in random.sample(range(len(s)), 100):
+            temp[i] += 1
+        if not is_in_numpy(temp, summary_new):
+            return temp
 
 
 def Accept(s, tmp, summary_current, T, S, lam):
