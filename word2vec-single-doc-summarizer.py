@@ -6,6 +6,7 @@ from evaluation import Level
 import evaluation as eval
 import utils as util
 
+
 NUMBER_SUMMARY_SET_ELEMENT = 5
 LAMBDA = 3
 TSTOP = 0.0001
