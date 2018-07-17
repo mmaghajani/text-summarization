@@ -5,13 +5,15 @@ import sparse_coding as sc
 import evaluation as eval
 import numpy as np
 from evaluation import Level
+import pprint
+
 
 DOCS = dict()
 WORD_DATA = dict()
 
 NUMBER_SUMMARY_SET_ELEMENT = 10
 LAMBDA = 3
-TSTOP = 0.0001
+TSTOP = 0.01
 MAX_CONSE_REJ = 100
 
 
@@ -98,6 +100,7 @@ for i in range(1,9):
                 reference_summaries = readSummaries(dir)
                 term_frequency = make_term_frequency(sentences, words)
                 candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
+
                 summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
                 summary_text = summary_vector_to_text_as_list(summary_set, term_frequency)
                 rouge_1_fscores = 0

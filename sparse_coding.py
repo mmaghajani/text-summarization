@@ -59,7 +59,7 @@ def update_summary(s, T, summary_new, S):
     return min_sentence
 
 
-def Accept(s, tmp, summary_current, T, S, A, lam):
+def Accept(s, tmp, summary_current, T, S, lam):
     summary_temp = list()
     for sentence in summary_current:
         if (s == sentence).all():
@@ -67,15 +67,19 @@ def Accept(s, tmp, summary_current, T, S, A, lam):
         else:
             summary_temp.append(sentence)
     summary_temp = np.array(summary_temp)
+    A = sparse_coding(S, summary_current, lam)
     current_J = J(S, A, summary_current, lam)
+    A = sparse_coding(S, summary_temp, lam)
     next_J = J(S, A, summary_temp, lam)
     if next_J < current_J:
         return True
     else:
         deltaE = current_J - next_J
+        # print(deltaE)
         if T == 0:
             return False
         p = math.e**(deltaE/T)
+        # print(p)
         if random.random() < p:
             return True
         else:
@@ -83,7 +87,7 @@ def Accept(s, tmp, summary_current, T, S, A, lam):
 
 
 def update_T(step):
-    return math.e**(-1*(step/5-5))
+    return math.fabs(math.sin(step))/step
 
 
 def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
@@ -103,7 +107,7 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
     rej = 0
     Jopti = 9999999     # max
     summary_opti = copy.deepcopy(summary_current)
-    step = 0
+    step = 1
     T = update_T(step)    # arbitrary
     while T > Tstop:
         A = sparse_coding(S, summary_current, lam)  # k*n matrice
@@ -119,7 +123,7 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
         summary_new = list()
         for s in summary_current:
             tmp = update_summary(s, T, summary_new, S)
-            if Accept(s, tmp, summary_current, T, S, A, lam):
+            if Accept(s, tmp, summary_current, T, S, lam):
                 summary_new.append(tmp)
             else:
                 summary_new.append(s)
@@ -127,4 +131,5 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
         summary_current = copy.deepcopy(temp)
         step += 1
         T = update_T(step)
+        print(T)
     return summary_opti
