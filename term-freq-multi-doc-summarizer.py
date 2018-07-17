@@ -9,7 +9,7 @@ from evaluation import Level
 DOCS = dict()
 WORD_DATA = dict()
 
-NUMBER_SUMMARY_SET_ELEMENT = 5
+NUMBER_SUMMARY_SET_ELEMENT = 10
 LAMBDA = 3
 TSTOP = 0.0001
 MAX_CONSE_REJ = 100
@@ -100,7 +100,6 @@ for i in range(1,9):
                 candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
                 summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
                 summary_text = summary_vector_to_text_as_list(summary_set, term_frequency)
-                print(len(summary_text))
                 rouge_1_fscores = 0
                 rouge_2_fscores = 0
                 for summary_ref in reference_summaries:

@@ -53,7 +53,7 @@ def update_summary(s, T, summary_new, S):
     min_sentence = 0
     for sentence in S:
         temp_dist = scipy.spatial.distance.euclidean(s, sentence)
-        if temp_dist < min_dist and not is_in_numpy(sentence, summary_new):
+        if temp_dist < min_dist and not is_in_numpy(sentence, summary_new) and temp_dist != 0:
             min_dist = temp_dist
             min_sentence = sentence
     return min_sentence
@@ -73,7 +73,7 @@ def Accept(s, tmp, summary_current, T, S, A, lam):
         return True
     else:
         deltaE = current_J - next_J
-        if T is 0:
+        if T == 0:
             return False
         p = math.e**(deltaE/T)
         if random.random() < p:
@@ -108,6 +108,7 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
     while T > Tstop:
         A = sparse_coding(S, summary_current, lam)  # k*n matrice
         current_J = J(S, A, summary_current, lam)
+        print(current_J)
         if current_J < Jopti:
             Jopti = current_J
             summary_opti = copy.deepcopy(summary_current)
@@ -122,7 +123,8 @@ def MDS_sparse(S, k, lam, Tstop, MaxConseRej):
                 summary_new.append(tmp)
             else:
                 summary_new.append(s)
-        summary_current = copy.deepcopy(np.array(summary_new))
+        temp = np.array(summary_new)
+        summary_current = copy.deepcopy(temp)
         step += 1
         T = update_T(step)
     return summary_opti
