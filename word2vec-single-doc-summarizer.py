@@ -2,6 +2,20 @@
 import numpy as np
 import pandas as pd
 import re
+import os
+import fnmatch
+import sparse_coding as sc
+from evaluation import Level
+import evaluation as eval
+
+
+NUMBER_SUMMARY_SET_ELEMENT = 5
+LAMBDA = 3
+TSTOP = 0.0001
+MAX_CONSE_REJ = 100
+
+DATA_PATH = "data/Single/Source/DUC/"
+SUMMARY_PATH = "data/Single/Summ/Extractive/"
 
 
 def read_document(doc_name):
@@ -22,6 +36,7 @@ def read_document(doc_name):
 
 
 w2v = dict()
+print("waiting to load word2vec model...")
 with open('twitt_wiki_ham_blog.fa.text.100.vec', 'r', encoding='utf-8') as infile:
     first_line = True
     for line in infile:
@@ -57,19 +72,70 @@ def represent(data, model):
                     replace("؟", " ").replace("!", " ").replace("،", " ").split(" ")))
         if words.__contains__(''):
             words.remove('')
-        DocMatix[i] = AvgSent2vec(words, model)
-        word2vec[data[i]] = DocMatix[i]
+
+        result = AvgSent2vec(words, model)
+        if not( np.isnan(result).any()):
+            DocMatix[i] = result
+            word2vec[data[i]] = DocMatix[i]
     print("features calculated")
     # print(word2vec)
     train_df = pd.DataFrame(DocMatix)
 
     train_df.to_csv('AvgSent2vec.csv', index=False)
 
-    return train_df
-
-result = represent(read_document('ALF.CU.13910117.019.txt'), w2v)
-print(result)
-print(result.shape)
+    return word2vec
 
 
+def summary_vector_to_text_as_list(summary_set, term_frequency):
+    summary_text = list()
+    for sen_vec in summary_set:
+        for sentence in term_frequency.keys():
+            if (term_frequency[sentence] == sen_vec).all():
+                summary_text.append(sentence)
+                break
+    return summary_text
+
+
+def read_ref_summaries(filename):
+    directory = os.fsencode(SUMMARY_PATH)
+    summaries = list()
+    for file in os.listdir(directory):
+        name = os.fsdecode(file)
+        if fnmatch.fnmatch(name, filename + '*'):
+            with open(SUMMARY_PATH + name) as summ_file:
+                lines = summ_file.readlines()
+                content = ''
+                for line in lines:
+                    content += line
+                sentences = re.split("\.|\?|\!", content)
+                summaries.append(sentences)
+                summ_file.close()
+    return summaries
+
+# result = represent(read_document('ALF.CU.13910117.019.txt'), w2v)
+# print(result)
+# print(result.shape)
+
+directory = os.fsencode(DATA_PATH)
+for file in os.listdir(directory):
+    filename = os.fsdecode(file)
+    # sentences = read_document(filename)
+    reference_summaries = read_ref_summaries(filename[:-4])
+
+    word2vec = represent(read_document(filename), w2v)
+
+    candidate_set = np.array(list([*v] for k, v in word2vec.items()))
+    summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ)
+    summary_text = summary_vector_to_text_as_list(summary_set, word2vec)
+    rouge_1_fscores = 0
+    rouge_2_fscores = 0
+    for summary_ref in reference_summaries:
+        rouge_1_fscore = eval.RougeFScore(summary_text,  summary_ref, Level.Rouge_1)
+        rouge_1_fscores += rouge_1_fscore
+
+        rouge_2_fscore = eval.RougeFScore(summary_text,  summary_ref, Level.Rouge_2)
+        rouge_2_fscores += rouge_2_fscore
+
+    print("Rouge-1 Fscore : ", rouge_1_fscores/5)
+    print("Rouge-2 Fscore : ", rouge_2_fscores/5)
 
