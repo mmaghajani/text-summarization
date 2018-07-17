@@ -7,6 +7,7 @@ import fnmatch
 import sparse_coding as sc
 from evaluation import Level
 import evaluation as eval
+from scipy.spatial import distance
 import scipy
 
 
