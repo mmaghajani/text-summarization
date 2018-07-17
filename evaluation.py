@@ -53,4 +53,8 @@ def RougeFScore(candidate_summary, reference_summary, n):
     Precision = Rouge(candidate_summary, reference_summary, n, "precision")
     Recall = Rouge(candidate_summary, reference_summary, n, "recall")
 
-    return 2 * (Precision * Recall) / (Precision + Recall)
+    if not (Precision + Recall == 0):
+        return 2 * (Precision * Recall) / (Precision + Recall)
+    else:
+        print("No CoOccurrings")
+        return 0
