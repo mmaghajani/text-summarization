@@ -7,6 +7,7 @@ import fnmatch
 import sparse_coding as sc
 from evaluation import Level
 import evaluation as eval
+import scipy
 
 
 NUMBER_SUMMARY_SET_ELEMENT = 5
@@ -89,10 +90,14 @@ def represent(data, model):
 def summary_vector_to_text_as_list(summary_set, term_frequency):
     summary_text = list()
     for sen_vec in summary_set:
+        min_dist = 9999999   # max
+        min_sentence = ''
         for sentence in term_frequency.keys():
-            if (term_frequency[sentence] == sen_vec).all():
-                summary_text.append(sentence)
-                break
+            temp_dist = scipy.spatial.distance.euclidean(sen_vec, term_frequency[sentence])
+            if temp_dist < min_dist:
+                min_dist = temp_dist
+                min_sentence = sentence
+        summary_text.append(min_sentence)
     return summary_text
 
 
