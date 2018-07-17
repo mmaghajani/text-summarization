@@ -11,6 +11,8 @@ LAMBDA = 3
 TSTOP = 0.0001
 MAX_CONSE_REJ = 100
 
+
+w2v = util.read_word2vec_model()
 rootdir = "data/Multi"
 for i in range(1,9):
     subDir = os.path.join(rootdir, "Track"+str(i)+"/Source/")
@@ -19,7 +21,7 @@ for i in range(1,9):
             for dir in dirs:
                 reference_summaries = util.read_multi_ref_summaries(dir)
                 sentences, _ = util.read_documents(subDir+dir+"/")
-                term_frequency = util.make_word_2_vec(sentences, util.read_word2vec_model())
+                term_frequency = util.make_word_2_vec(sentences, w2v)
                 candidate_set = np.array(list([*v] for k, v in term_frequency.items()))
                 try:
                     summary_set = sc.MDS_sparse(candidate_set, NUMBER_SUMMARY_SET_ELEMENT,
