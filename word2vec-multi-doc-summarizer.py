@@ -32,7 +32,7 @@ for i in range(1,9):
                 try:
                     rouge_1_fscore, rouge_2_fscore, rouge_1_precision, rouge_2_precision, \
                     rouge_1_recall, rouge_2_recall = \
-                        util.evaluate(word_2_vec, K, LAMBDA, TSTOP, MAX_CONSE_REJ, reference_summaries)
+                        util.evaluate(word_2_vec, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ, reference_summaries)
                     rouge1_fscores_list.append(rouge_1_fscore)
                     rouge2_fscores_list.append(rouge_2_fscore)
                     rouge1_precisions_list.append(rouge_1_precision)
