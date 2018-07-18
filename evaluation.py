@@ -26,7 +26,10 @@ def Rouge(candidate_summary, reference_summary, level, mode):  # mode = precisio
                     coOccurrings.append(bigram)
 
         if mode == "precision":
-            return len(set(coOccurrings)) / len(collect_pairs(candidate_summary))
+            try:
+                return len(set(coOccurrings)) / len(collect_pairs(candidate_summary))
+            except Exception:
+                print("Exception : ", candidate_summary)
         elif mode == "recall":
             return len(set(coOccurrings)) / len(bigrams)
 
