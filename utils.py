@@ -80,6 +80,7 @@ def make_term_frequency(sentences, words):
             vector.append(sentence.count(word))
         if norm(vector) != 0:
             term_frequency[sentence] = vector
+            # term_frequency[sentence] = vector / norm(vector, ord=1)
     return term_frequency
 
 
