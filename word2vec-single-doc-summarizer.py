@@ -22,6 +22,7 @@ for file in os.listdir(directory):
     filename = os.fsdecode(file)
     # sentences = read_document(filename)
     reference_summaries, K = util.read_single_ref_summaries(filename[:-4])
+
     sentence, _ = util.read_document(filename)
     word2vec = util.make_word_2_vec(sentence, w2v)
 
@@ -29,7 +30,7 @@ for file in os.listdir(directory):
     try:
         rouge_1_fscore, rouge_2_fscore , rouge_1_precision, rouge_2_precision,\
             rouge_1_recall, rouge_2_recall = \
-            util.evaluate(word2vec, K, LAMBDA, TSTOP, MAX_CONSE_REJ, reference_summaries)
+            util.evaluate(word2vec, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ, reference_summaries)
         rouge1_fscores_list.append(rouge_1_fscore)
         rouge2_fscores_list.append(rouge_2_fscore)
         rouge1_precisions_list.append(rouge_1_precision)
