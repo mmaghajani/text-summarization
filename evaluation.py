@@ -26,7 +26,10 @@ def Rouge(candidate_summary, reference_summary, level, mode):  # mode = precisio
                     coOccurrings.append(bigram)
 
         if mode == "precision":
-            return len(set(coOccurrings)) / len(collect_pairs(candidate_summary))
+            try:
+                return len(set(coOccurrings)) / len(collect_pairs(candidate_summary))
+            except Exception:
+                print("Exception : ", candidate_summary)
         elif mode == "recall":
             return len(set(coOccurrings)) / len(bigrams)
 
@@ -49,7 +52,7 @@ def Rouge(candidate_summary, reference_summary, level, mode):  # mode = precisio
             return len(set(coOccurrings)) / len(unigrams)
 
 
-def RougeFScore(candidate_summary, reference_summary, n):
+def rouge_Fscore(candidate_summary, reference_summary, n):
     Precision = Rouge(candidate_summary, reference_summary, n, "precision")
     Recall = Rouge(candidate_summary, reference_summary, n, "recall")
 
@@ -58,3 +61,15 @@ def RougeFScore(candidate_summary, reference_summary, n):
     else:
         print("No CoOccurrings")
         return 0
+
+
+def rouge_precision(candidate_summary, reference_summary, n):
+    precision = Rouge(candidate_summary, reference_summary, n, "precision")
+    return precision
+
+
+def rouge_recall(candidate_summary, reference_summary, n):
+    recall = Rouge(candidate_summary, reference_summary, n, "recall")
+    return recall
+
+
