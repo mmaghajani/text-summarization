@@ -2,7 +2,7 @@ import os
 import utils as util
 
 
-# NUMBER_SUMMARY_SET_ELEMENT = 10
+NUMBER_SUMMARY_SET_ELEMENT = 10     # used for fixed K
 LAMBDA = 0.5
 TSTOP = 0.001
 MAX_CONSE_REJ = 100

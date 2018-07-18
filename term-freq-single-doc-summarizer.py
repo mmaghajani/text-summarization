@@ -2,7 +2,7 @@ import os
 import utils as util
 
 
-# NUMBER_SUMMARY_SET_ELEMENT = 10
+NUMBER_SUMMARY_SET_ELEMENT = 5  # used for fixed K
 LAMBDA = 0.1
 TSTOP = 0.0001
 MAX_CONSE_REJ = 100
@@ -25,7 +25,7 @@ for file in os.listdir(directory):
     try:
         rouge_1_fscore, rouge_2_fscore , rouge_1_precision, rouge_2_precision,\
             rouge_1_recall, rouge_2_recall = \
-            util.evaluate(term_frequency, K, LAMBDA, TSTOP, MAX_CONSE_REJ, reference_summaries)
+            util.evaluate(term_frequency, NUMBER_SUMMARY_SET_ELEMENT, LAMBDA, TSTOP, MAX_CONSE_REJ, reference_summaries)
         rouge1_fscores_list.append(rouge_1_fscore)
         rouge2_fscores_list.append(rouge_2_fscore)
         rouge1_precisions_list.append(rouge_1_precision)
