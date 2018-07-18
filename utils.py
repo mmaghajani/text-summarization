@@ -115,7 +115,7 @@ def make_word_2_vec(data, model):
     # print(word2vec)
     train_df = pd.DataFrame(DocMatix)
 
-    train_df.to_csv('AvgSent2vec.csv', index=False)
+    # train_df.to_csv('AvgSent2vec.csv', index=False)
 
     return word2vec
 
